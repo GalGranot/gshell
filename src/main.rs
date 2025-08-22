@@ -1,5 +1,9 @@
 use std::io::Write;
 
+use crate::cmds::{exe_cmd, CmdMap, ExeResult};
+
+mod cmds;
+
 fn gshell_die(msg: &str) -> ! {
     eprintln!("gshell error: {}: exiting...", msg);
     std::io::stderr().flush().unwrap(); // TODO: handle gracefully
@@ -22,35 +26,25 @@ fn print_prompt() {
     std::io::stdout().flush().unwrap(); // TODO: handle gracefully
 }
 
-enum ExeResult {
-    Empty,
-    Quit,
-    Unknown,
-    Ok(isize)
-}
 
-fn exe_cmd(input: String) -> ExeResult {
-    let parsed: Vec<&str> = input.trim().split_whitespace().collect();
-    if parsed.len() == 0 {
-        return ExeResult::Empty;
-    }
-    match parsed[0] {
-        "quit" => ExeResult::Quit,
-        _ => ExeResult::Unknown
-    }
-}
 
-struct ShellState {
-    last_cmd_code: isize
+
+
+struct ShellState<'a> {
+    last_cmd_code: isize,
+    map: CmdMap<'a>
 }
 
 impl ShellState {
     fn new() -> Self {
-        Self {last_cmd_code: 0}
+        Self {
+            last_cmd_code: 0,
+            map: cmd_map_new
+        }
     }
 }
 
-fn main() {
+fn main() -> ! {
     let mut state = ShellState::new();
     loop {
         print_prompt();
