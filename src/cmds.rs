@@ -49,6 +49,17 @@ fn exe_pwd(args: &[&str]) -> ExeResult {
     }
 }
 
+fn try_external(args: &[&str]) -> ExeResult {
+    if let Ok(output) = std::process::Command::new(&args[0])
+        .args(&args[1..])
+        .output() {
+            std::io::stdout().write_all(&output.stdout).unwrap(); // TODO handle errors
+            ExeResult::Ok(0)
+        } else {
+            ExeResult::Unknown
+        }
+}
+
 pub fn exe_cmd(input: String, state: &ShellState) -> ExeResult {
     let parsed: Vec<&str> = input.trim().split_whitespace().collect();
     if parsed.len() == 0 {
@@ -56,6 +67,7 @@ pub fn exe_cmd(input: String, state: &ShellState) -> ExeResult {
     }
     match state.cmd_map.get(parsed[0]) {
         Some(handler) => handler(&parsed[1..]),
-        None => ExeResult::Unknown
+        None => try_external(&parsed)
     }
 }
+
