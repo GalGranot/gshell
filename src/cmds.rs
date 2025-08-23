@@ -1,10 +1,14 @@
 use std::{collections::HashMap, io::Write};
 
+use crate::ShellState;
+
 pub enum ExeResult {
     Empty,
     Quit,
     Unknown,
-    Ok(isize)
+    Ok(isize),
+    BadArgs,
+    Err // TODO make errors more descriptive
 }
 
 fn gshell_cmd_error(cmd: &str, msg: &str) {
@@ -12,38 +16,46 @@ fn gshell_cmd_error(cmd: &str, msg: &str) {
     std::io::stdout().flush().unwrap(); // TODO: handle gracefully
 }
 
-pub type CmdFn = fn(&[&str]) -> isize;
+pub type CmdFn = fn(&[&str]) -> ExeResult;
 pub type CmdMap = HashMap<&'static str, CmdFn>;
 
-fn cmd_map_new() -> CmdMap {
+pub fn cmd_map_new() -> CmdMap {
     let mut m: CmdMap = HashMap::new();
     m.insert("pwd", exe_pwd);
+    m.insert("quit", exe_quit);
     m
 }
 
-fn exe_pwd(args: &[&str]) -> isize {
+fn exe_quit(args: &[&str]) -> ExeResult {
+    match args.len() {
+        0 => ExeResult::Quit,
+        _ => ExeResult::BadArgs
+    }
+}
+
+fn exe_pwd(args: &[&str]) -> ExeResult {
     if args.len() != 0 {
         
     }
     match std::env::current_dir() {
         Ok(path) => {
             println!("{}", path.display());
-            0
+            ExeResult::Ok(0)
         }
         Err(_e) => { // TODO: think about how incorporate errors
             gshell_cmd_error("pwd", "getcwd failed");
-            1
+            ExeResult::Err
         }
     }
 }
 
-pub fn exe_cmd(input: String) -> ExeResult {
+pub fn exe_cmd(input: String, state: &ShellState) -> ExeResult {
     let parsed: Vec<&str> = input.trim().split_whitespace().collect();
     if parsed.len() == 0 {
         return ExeResult::Empty;
     }
-    match parsed[0] {
-        "quit" => ExeResult::Quit,
-        _ => ExeResult::Unknown
+    match state.cmd_map.get(parsed[0]) {
+        Some(handler) => handler(&parsed[1..]),
+        None => ExeResult::Unknown
     }
 }

@@ -1,6 +1,8 @@
 use std::io::Write;
 
-use crate::cmds::{exe_cmd, CmdMap, ExeResult};
+use crate::cmds::{
+    cmd_map_new, exe_cmd, CmdMap, ExeResult
+};
 
 mod cmds;
 
@@ -27,19 +29,16 @@ fn print_prompt() {
 }
 
 
-
-
-
-struct ShellState<'a> {
+struct ShellState {
     last_cmd_code: isize,
-    map: CmdMap<'a>
+    cmd_map: CmdMap
 }
 
 impl ShellState {
     fn new() -> Self {
         Self {
             last_cmd_code: 0,
-            map: cmd_map_new
+            cmd_map: cmd_map_new()
         }
     }
 }
@@ -54,11 +53,13 @@ fn main() -> ! {
             Ok(_) => {} // Continue to parsing
             Err(_e) => gshell_die("stdin"),
         }
-        match exe_cmd(input) {
+        match exe_cmd(input, &state) {
             ExeResult::Empty => continue,
             ExeResult::Quit => gshell_exit(),
             ExeResult::Ok(code) => state.last_cmd_code = code,
             ExeResult::Unknown => gshell_perror("Unknown command"),
+            ExeResult::BadArgs => gshell_perror("Bad args"), // TODO lookup number of args/usage to print here
+            ExeResult::Err => {} // TODO make descriptive
         }
     }
 }
