@@ -1,9 +1,10 @@
 use std::io::Write;
 
-use crate::cmds::{
-    cmd_map_new, exe_cmd, CmdMap, ExeResult
-};
+use crate::{
+    cmds::{cmd_map_new, CmdMap},
+    exe::{exe_cmd, ExeResult}};
 
+mod exe;
 mod cmds;
 
 fn gshell_die(msg: &str) -> ! {
@@ -55,11 +56,12 @@ fn main() -> ! {
         }
         match exe_cmd(input, &state) {
             ExeResult::Empty => continue,
-            ExeResult::Quit => gshell_exit(),
+            ExeResult::Quit => break,
             ExeResult::Ok(code) => state.last_cmd_code = code,
             ExeResult::Unknown => gshell_perror("Unknown command"),
-            ExeResult::BadArgs => {}
+            ExeResult::BadArgs => {},
             ExeResult::Err => {} // TODO make descriptive
         }
     }
+    gshell_exit();
 }
