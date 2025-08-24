@@ -47,16 +47,10 @@ pub fn cmd_map_new() -> CmdMap {
 }
 
 fn exe_quit(args: &[&str]) -> ExeResult {
-    match args.len() {
-        0 => ExeResult::Quit,
-        _ => ExeResult::BadArgs
-    }
+    ExeResult::Quit
 }
 
 fn exe_pwd(args: &[&str]) -> ExeResult {
-    if args.len() != 0 {
-        
-    }
     match std::env::current_dir() {
         Ok(path) => {
             println!("{}", path.display());
@@ -67,6 +61,10 @@ fn exe_pwd(args: &[&str]) -> ExeResult {
             ExeResult::Err
         }
     }
+}
+
+fn exe_cd(args: &[&str]) -> ExeResult {
+
 }
 
 fn try_external(args: &[&str]) -> ExeResult {
