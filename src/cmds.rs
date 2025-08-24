@@ -43,14 +43,15 @@ pub fn cmd_map_new() -> CmdMap {
     let mut m: CmdMap = HashMap::new();
     m.insert("pwd", Cmd::new(exe_pwd, 0));
     m.insert("quit", Cmd::new(exe_quit, 0));
+    m.insert("cd", Cmd::new(exe_cd, 1));
     m
 }
 
-fn exe_quit(args: &[&str]) -> ExeResult {
+fn exe_quit(_args: &[&str]) -> ExeResult {
     ExeResult::Quit
 }
 
-fn exe_pwd(args: &[&str]) -> ExeResult {
+fn exe_pwd(_args: &[&str]) -> ExeResult {
     match std::env::current_dir() {
         Ok(path) => {
             println!("{}", path.display());
@@ -64,7 +65,14 @@ fn exe_pwd(args: &[&str]) -> ExeResult {
 }
 
 fn exe_cd(args: &[&str]) -> ExeResult {
-
+    match std::env::set_current_dir(
+        std::path::Path::new(&args[0])) {
+            Ok(_) => ExeResult::Ok(0),
+            Err(_) => {
+                gshell_cmd_error("cd", "couldn't change directory");
+                ExeResult::Err
+            }
+        }
 }
 
 fn try_external(args: &[&str]) -> ExeResult {
