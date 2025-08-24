@@ -58,7 +58,7 @@ fn main() -> ! {
             ExeResult::Quit => gshell_exit(),
             ExeResult::Ok(code) => state.last_cmd_code = code,
             ExeResult::Unknown => gshell_perror("Unknown command"),
-            ExeResult::BadArgs => gshell_perror("Bad args"), // TODO lookup number of args/usage to print here
+            ExeResult::BadArgs => {}
             ExeResult::Err => {} // TODO make descriptive
         }
     }
