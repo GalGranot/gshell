@@ -1,11 +1,12 @@
 use std::{collections::HashMap, io::Write};
 
-use crate::{cmds::echo::exe_echo, exe::ExeResult};
+use crate::{cmds::echo::exe_echo, exe::{CmdArgs, ExeResult}};
 
 pub mod cd;
 pub mod quit;
 pub mod pwd;
 pub mod echo;
+pub mod history;
 
 // To add new command:
 // 1. insert it to cmd_map_new
@@ -13,7 +14,7 @@ pub mod echo;
 // 3. add pub mod <cmd> at top of this file
 
 
-pub type CmdFn = fn(&[&str]) -> ExeResult;
+pub type CmdFn = fn(&mut CmdArgs) -> ExeResult;
 pub struct Cmd {
     pub(crate) handler: CmdFn,
     pub(crate) nargs: usize
@@ -37,6 +38,7 @@ pub fn cmd_map_new() -> CmdMap {
     m.insert("quit", Cmd::new(quit::exe_quit, 0));
     m.insert("cd", Cmd::new(cd::exe_cd, 1));
     m.insert("echo", Cmd::new(exe_echo, 1));
+    m.insert("history", Cmd::new(history::exe_history, 0));
     m
 }
 

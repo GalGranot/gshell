@@ -1,4 +1,6 @@
-use std::io::Write;
+use std::{collections::VecDeque, io::Write};
+
+const INIT_HISTORY_SIZE: usize = 500;
 
 use crate::{
     cmds::{cmd_map_new, CmdMap},
@@ -29,22 +31,47 @@ fn print_prompt() {
     std::io::stdout().flush().unwrap(); // TODO: handle gracefully
 }
 
+pub struct History {
+    capacity: usize,
+    queue: VecDeque<String>,
+}
+
+impl History {
+    pub fn new(capacity: usize) -> Self {
+        Self {
+            capacity: capacity,
+            queue: VecDeque::with_capacity(capacity)
+        }
+    }
+    pub fn push(&mut self, entry: String) {
+        self.queue.push_back(entry);
+        if self.queue.len() > self.capacity {
+            self.queue.pop_back();
+        }
+    }
+    fn print(&self) {
+        for entry in &self.queue {
+            println!("{}", entry);
+        }
+    }
+}
 
 struct ShellState {
     last_cmd_code: isize,
-    cmd_map: CmdMap
+    history: History,
 }
 
 impl ShellState {
     fn new() -> Self {
         Self {
             last_cmd_code: 0,
-            cmd_map: cmd_map_new()
+            history: History::new(INIT_HISTORY_SIZE),
         }
     }
 }
 
 fn main() -> ! {
+    let cmd_map = cmd_map_new();
     let mut state = ShellState::new();
     loop {
         print_prompt();
@@ -54,7 +81,7 @@ fn main() -> ! {
             Ok(_) => {} // Continue to parsing
             Err(_e) => gshell_die("stdin"),
         }
-        match exe_cmd(input, &state) {
+        match exe_cmd(input, &mut state, &cmd_map) {
             ExeResult::Empty => continue,
             ExeResult::Quit => break,
             ExeResult::Ok(code) => state.last_cmd_code = code,

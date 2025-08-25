@@ -1,6 +1,6 @@
-use crate::exe::ExeResult;
+use crate::exe::{CmdArgs, ExeResult};
 
-pub fn exe_pwd(_args: &[&str]) -> ExeResult {
+pub fn exe_pwd(_args: &mut CmdArgs) -> ExeResult {
     match std::env::current_dir() {
         Ok(path) => {
             println!("{}", path.display());
