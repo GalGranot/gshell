@@ -3,7 +3,7 @@ use std::{collections::VecDeque, io::Write};
 const INIT_HISTORY_SIZE: usize = 500;
 
 use crate::{
-    cmds::{cmd_map_new, CmdMap},
+    cmds::cmd_map_new,
     exe::{exe_cmd, ExeResult}};
 
 mod exe;
@@ -27,7 +27,9 @@ fn gshell_perror(msg: &str) {
 }
 
 fn print_prompt() {
-    print!("gshell > ");
+    let path = std::env::current_dir().unwrap();
+    let user = std::env::var("USER").unwrap(); // TODO: handle gracefully
+    print!("{}:{} ", user, path.display());
     std::io::stdout().flush().unwrap(); // TODO: handle gracefully
 }
 
@@ -39,7 +41,7 @@ pub struct History {
 impl History {
     pub fn new(capacity: usize) -> Self {
         Self {
-            capacity: capacity,
+            capacity,
             queue: VecDeque::with_capacity(capacity)
         }
     }

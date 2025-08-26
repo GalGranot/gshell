@@ -21,11 +21,8 @@ pub struct Cmd {
 }
 
 impl Cmd {
-    pub fn new(cmd_fn: CmdFn, nargs: usize) -> Self {
-        Self {
-            handler: cmd_fn,
-            nargs: nargs
-        }
+    pub fn new(handler: CmdFn, nargs: usize) -> Self {
+        Self { handler, nargs }
     }
 }
 

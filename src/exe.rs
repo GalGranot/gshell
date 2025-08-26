@@ -39,11 +39,11 @@ pub fn exe_cmd(
     state: &mut ShellState,
     cmd_map: &CmdMap
 ) -> ExeResult {
-    let parsed: Vec<&str> = input.trim().split_whitespace().collect();
-    if parsed.len() == 0 {
+    let parsed: Vec<&str> = input.split_whitespace().collect();
+    if parsed.is_empty() {
         return ExeResult::Empty;
     }
-    let mut input_backup = input.clone(); // TODO: use initial input
+    let input_backup = input.clone(); // TODO: use initial input
     update_history(input_backup, state);
     let cmd_name = &parsed[0];
     let mut args = CmdArgs::new(state, &parsed[1..]);
@@ -52,7 +52,7 @@ pub fn exe_cmd(
             if cmd.nargs == args.args.len() {
                 (cmd.handler)(&mut args)
             } else {
-                gshell_cmd_wrong_nargs(&cmd_name, &cmd, args.args.len())
+                gshell_cmd_wrong_nargs(cmd_name, cmd, args.args.len())
             }
         }
         None => try_external(&parsed)
